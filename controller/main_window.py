@@ -29,6 +29,8 @@ class MainWindow(QMainWindow):
         self.actionOpen.triggered.connect(lambda: self.open())
         self.actionOpenPath.triggered.connect(lambda: self.open_path())
         self.actionFit.triggered.connect(lambda: self.fit())
+        self.actionRotateRight.triggered.connect(lambda: self.rotateRight())
+        self.actionRotateLeft.triggered.connect(lambda: self.rotateLeft())
         self.imageList.itemSelectionChanged.connect(self.selectChanged)
     
         # define consts
@@ -141,9 +143,19 @@ class MainWindow(QMainWindow):
         self.image_cache.request_image(image_name, set_image)
     ##### image process end #####
 
-    ##### key shortcut start #####
+    ##### edit funtion start #####
     def fit(self):
         if self.selected_image_name is None:
             return
         self.imageViewer.resetAndFit()
-    ##### key shortcut end #####
+
+    def rotateRight(self):
+        if self.selected_image_name is None:
+            return
+        self.imageViewer.rotateRight()
+
+    def rotateLeft(self):
+        if self.selected_image_name is None:
+            return
+        self.imageViewer.rotateLeft()
+    ##### edit funtion end #####

@@ -149,6 +149,16 @@ class ImageViewer(QGraphicsView):
         self.displayedImageSize = self.__getScaleRatio()*self.pixmap.size()
         self.zoomInFactors = 1.0
 
+    def rotateRight(self):
+        self.pixmapItem.setTransformOriginPoint(self.pixmap.rect().center())
+        self.pixmapItem.setRotation(self.pixmapItem.rotation() + 90)
+        self.displayedImageSize = QSize(self.displayedImageSize.height(), self.displayedImageSize.width())
+
+    def rotateLeft(self):
+        self.pixmapItem.setTransformOriginPoint(self.pixmap.rect().center())
+        self.pixmapItem.setRotation(self.pixmapItem.rotation() - 90)
+        self.displayedImageSize = QSize(self.displayedImageSize.height(), self.displayedImageSize.width())
+
     def zoomIn(self, factor=1.1, viewAnchor=QGraphicsView.AnchorUnderMouse):
         """ 放大图像 """
         pw = self.pixmap.width()
