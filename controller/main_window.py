@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
             self.imageViewer.keepRatioWhenSwitchImage = True
 
             self.setWindowTitle(f'{self.APP_NAME} - {self.selected_image_name}')
-            self.infoLabel.setText(f"当前第{self.image_name2idx[self.selected_image_name]}项，共{self.file_list_len}项; f{calc_exif_number(exif_tags['EXIF FNumber'])} {exif_tags['EXIF ExposureTime']}s iso{exif_tags['EXIF ISOSpeedRatings']} {calc_exif_number(exif_tags['EXIF FocalLength'],2)}mm")
+            self.infoLabel.setText(f"当前第{self.image_name2idx[self.selected_image_name] + 1}项，共{self.file_list_len}项; f{calc_exif_number(exif_tags['EXIF FNumber'])} {exif_tags['EXIF ExposureTime']}s iso{exif_tags['EXIF ISOSpeedRatings']} {calc_exif_number(exif_tags['EXIF FocalLength'],2)}mm")
         self.image_cache.request_image(image_name, set_image)
     ##### image process end #####
 
