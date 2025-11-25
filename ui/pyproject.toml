@@ -1,0 +1,5 @@
+[project]
+name = "Picv UI"
+
+[tool.pyside6-project]
+files = ["main_window.ui","image_list_item.ui"]
