@@ -11,7 +11,7 @@ from PyQt5.QtGui import QPixmap
 from .image_viewer import ImageViewer
 from .image_list import ImageList
 from service.image_cache import ImageCache
-from service.util import calc_F_number
+from service.util import calc_exif_number
 
 class MainWindow(QMainWindow):
     def __init__(self, dir_path=None):
@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         # connect signals
         self.actionOpen.triggered.connect(lambda: self.open())
         self.actionOpenPath.triggered.connect(lambda: self.open_path())
+        self.actionFit.triggered.connect(lambda: self.fit())
         self.imageList.itemSelectionChanged.connect(self.selectChanged)
     
         # define consts
@@ -53,6 +54,7 @@ class MainWindow(QMainWindow):
                 print('file not exist!')
                 pass
     
+    ##### file process start #####
     def init_dir(self, dir_path):
         all_items = os.listdir(dir_path)
         valid_ext = set(self.VALID_FORMAT)
@@ -95,7 +97,9 @@ class MainWindow(QMainWindow):
         
         self.select(self.file_list[0])
         self.cache_files()
+    ##### file process end #####
 
+    ##### image process start #####
     def cache_files(self):
         cur_idx = self.image_name2idx[self.selected_image_name]
         valid_names = []
@@ -133,6 +137,13 @@ class MainWindow(QMainWindow):
             self.imageViewer.keepRatioWhenSwitchImage = True
 
             self.setWindowTitle(f'{self.APP_NAME} - {self.selected_image_name}')
-            self.infoLabel.setText(f"当前第{self.image_name2idx[self.selected_image_name]}项，共{self.file_list_len}项; f{calc_F_number(exif_tags['EXIF FNumber'])} {exif_tags['EXIF ExposureTime']}s iso{exif_tags['EXIF ISOSpeedRatings']} {exif_tags['EXIF FocalLength']}mm")
+            self.infoLabel.setText(f"当前第{self.image_name2idx[self.selected_image_name]}项，共{self.file_list_len}项; f{calc_exif_number(exif_tags['EXIF FNumber'])} {exif_tags['EXIF ExposureTime']}s iso{exif_tags['EXIF ISOSpeedRatings']} {calc_exif_number(exif_tags['EXIF FocalLength'],2)}mm")
         self.image_cache.request_image(image_name, set_image)
-        
+    ##### image process end #####
+
+    ##### key shortcut start #####
+    def fit(self):
+        if self.selected_image_name is None:
+            return
+        self.imageViewer.resetAndFit()
+    ##### key shortcut end #####

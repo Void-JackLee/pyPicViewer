@@ -104,12 +104,16 @@ class ImageViewer(QGraphicsView):
 
         # 调整图片大小
         if not self.keepRatioWhenSwitchImage:
-            self.resetTransform()
-            self.setSceneRect(QRectF(self.pixmap.rect()))
-            ratio = self.__getScaleRatio()
-            self.displayedImageSize = self.pixmap.size()*ratio
-            if ratio < 1:
-                self.fitInView(self.pixmapItem, Qt.KeepAspectRatio)
+            self.resetAndFit()
+    
+    def resetAndFit(self):
+        self.resetTransform()
+        self.setSceneRect(QRectF(self.pixmap.rect()))
+        ratio = self.__getScaleRatio()
+        self.displayedImageSize = self.pixmap.size()*ratio
+        if ratio < 1:
+            self.fitInView(self.pixmapItem, Qt.KeepAspectRatio)
+
 
     def resetTransform(self):
         """ 重置变换 """
