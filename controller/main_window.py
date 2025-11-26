@@ -28,9 +28,12 @@ class MainWindow(QMainWindow):
         # connect signals
         self.actionOpen.triggered.connect(lambda: self.open())
         self.actionOpenPath.triggered.connect(lambda: self.open_path())
+        self.actionDelete.triggered.connect(lambda: self.delete())
         self.actionFit.triggered.connect(lambda: self.fit())
         self.actionRotateRight.triggered.connect(lambda: self.rotateRight())
         self.actionRotateLeft.triggered.connect(lambda: self.rotateLeft())
+        self.actionNext.triggered.connect(lambda: self.nextImage())
+        self.actionPrevious.triggered.connect(lambda: self.previousImage())
         self.imageList.itemSelectionChanged.connect(self.selectChanged)
     
         # define consts
@@ -144,6 +147,9 @@ class MainWindow(QMainWindow):
     ##### image process end #####
 
     ##### edit funtion start #####
+    def delete(self):
+        pass
+
     def fit(self):
         if self.selected_image_name is None:
             return
@@ -158,4 +164,15 @@ class MainWindow(QMainWindow):
         if self.selected_image_name is None:
             return
         self.imageViewer.rotateLeft()
+
+    def nextImage(self):
+        idx = self.image_name2idx[self.selected_image_name]
+        if idx + 1 < self.file_list_len:
+            self.select(self.file_list[idx + 1])
+
+    def previousImage(self):
+        idx = self.image_name2idx[self.selected_image_name]
+        if idx - 1 >= 0:
+            self.select(self.file_list[idx - 1])
+
     ##### edit funtion end #####
