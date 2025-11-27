@@ -84,8 +84,11 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionOpenPath"/>
+    <addaction name="actionOpenLast"/>
+    <addaction name="separator"/>
     <addaction name="actionReloadPath"/>
     <addaction name="separator"/>
+    <addaction name="actionClose"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menu_edit">
@@ -104,6 +107,7 @@
     <addaction name="separator"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
+    <addaction name="actionLast"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_edit"/>
@@ -126,12 +130,28 @@
     <string>Ctrl+Shift+O</string>
    </property>
   </action>
+  <action name="actionOpenLast">
+   <property name="text">
+    <string>Open Last</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+O</string>
+   </property>
+  </action>
   <action name="actionReloadPath">
    <property name="text">
     <string>Reload Path</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionExit">
@@ -180,6 +200,14 @@
    </property>
    <property name="shortcut">
     <string>Left</string>
+   </property>
+  </action>
+  <action name="actionLast">
+   <property name="text">
+    <string>Last</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
    </property>
   </action>
   <action name="actionDelete">

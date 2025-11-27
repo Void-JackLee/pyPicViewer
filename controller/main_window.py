@@ -29,13 +29,16 @@ class MainWindow(QMainWindow):
         # connect signals
         self.actionOpen.triggered.connect(lambda: self.open())
         self.actionOpenPath.triggered.connect(lambda: self.open_path())
+        self.actionOpenLast.triggered.connect(lambda: self.open_last())
         self.actionReloadPath.triggered.connect(lambda: self.reload_path())
+        self.actionClose.triggered.connect(lambda: self._close())
         self.actionDelete.triggered.connect(lambda: self.delete())
         self.actionFit.triggered.connect(lambda: self.fit())
         self.actionRotateRight.triggered.connect(lambda: self.rotateRight())
         self.actionRotateLeft.triggered.connect(lambda: self.rotateLeft())
         self.actionNext.triggered.connect(lambda: self.nextImage())
         self.actionPrevious.triggered.connect(lambda: self.previousImage())
+        self.actionLast.triggered.connect(lambda: self.lastImage())
         self.imageList.itemSelectionChanged.connect(self.selectChanged)
     
         # define consts
@@ -46,6 +49,7 @@ class MainWindow(QMainWindow):
         # define props
         self.cur_dir: str = None
         self.selected_image_name: str = None
+        self.last_image_name = None
         self.image_name2idx: dict[str, int] = {}
         self.file_list: list[str] = []
         self.file_list_len = 0
@@ -76,6 +80,7 @@ class MainWindow(QMainWindow):
         self.file_list = file_list
         self.file_list_len = len(file_list)
         self.image_cache.init(dir_path)
+        self.last_image_name = None
 
         # 缩略图
         self.imageList.set_list(dir_path, file_list)
@@ -104,6 +109,56 @@ class MainWindow(QMainWindow):
         
         self.select(self.file_list[0])
         self.cache_files()
+
+    def open_last(self):
+        with open(os.path.join(self.imageList.THUMBNAIL_DIR, 'last'), 'r', encoding='utf-8') as f:
+            last = f.read()
+        self.open(last)
+
+    def reload_path(self):
+        if self.selected_image_name is None:
+            return
+        self.open(os.path.join(self.cur_dir, self.selected_image_name))
+
+    def delete(self):
+        if self.selected_image_name not in self.image_name2idx:
+            return
+        cur_idx = self.image_name2idx[self.selected_image_name]
+
+        # perform 'delete' on disk
+        del_path = os.path.join(self.cur_dir, 'trash_pic')
+        os.makedirs(del_path, exist_ok=True)
+        shutil.move(os.path.join(self.cur_dir, self.selected_image_name),del_path)
+
+        # delete cache and update indexs
+        for i in range(cur_idx + 1, self.file_list_len):
+            self.image_name2idx[self.file_list[i]] -= 1
+        del self.image_name2idx[self.selected_image_name]
+        del self.file_list[cur_idx]
+        self.file_list_len -= 1
+        self.imageList.takeItem(cur_idx)
+
+        if self.file_list_len == 0: return
+        if cur_idx >= self.file_list_len:
+            cur_idx -= 1
+        self.selected_image_name = None # 防止last读到空
+        self.select(self.file_list[cur_idx])
+    
+    def _close(self):
+        self.imageList.clear()
+        self.imageViewer.pixmap = QPixmap()
+        self.imageViewer.pixmapItem.setPixmap(self.imageViewer.pixmap)
+        self.image_cache.clear_cache()
+        self.cur_dir: str = None
+        self.selected_image_name: str = None
+        self.last_image_name = None
+        self.image_name2idx: dict[str, int] = {}
+        self.file_list: list[str] = []
+        self.file_list_len = 0
+        self.infoLabel.setText('')
+        self.setWindowTitle('picv')
+
+
     ##### file process end #####
 
     ##### image process start #####
@@ -129,10 +184,13 @@ class MainWindow(QMainWindow):
     def select(self, image_name):
         self.imageList.item(self.image_name2idx[image_name]).setSelected(True)
         self.imageList.scrollToItem(self.imageList.selectedItems()[0])
+        with open(os.path.join(self.imageList.THUMBNAIL_DIR, 'last'), 'w', encoding='utf-8') as f:
+            f.write(os.path.join(self.cur_dir, self.selected_image_name))
 
     def selectChanged(self):
         if len(self.imageList.selectedItems()) == 0:
             return
+        self.last_image_name = self.selected_image_name
         cur = self.imageList.selectedItems()[0].data(Qt.UserRole)
         self.selected_image_name = cur
         self.display_image(cur)
@@ -150,30 +208,6 @@ class MainWindow(QMainWindow):
     ##### image process end #####
 
     ##### edit funtion start #####
-    def reload_path(self):
-        self.open(os.path.join(self.cur_dir, self.selected_image_name))
-
-    def delete(self):
-        cur_idx = self.image_name2idx[self.selected_image_name]
-
-        # perform 'delete' on disk
-        del_path = os.path.join(self.cur_dir, 'trash_pic')
-        os.makedirs(del_path, exist_ok=True)
-        shutil.move(os.path.join(self.cur_dir, self.selected_image_name),del_path)
-
-        # delete cache and update indexs
-        for i in range(cur_idx + 1, self.file_list_len):
-            self.image_name2idx[self.file_list[i]] -= 1
-        del self.image_name2idx[self.selected_image_name]
-        del self.file_list[cur_idx]
-        self.file_list_len -= 1
-        self.imageList.takeItem(cur_idx)
-
-        if self.file_list_len == 0: return
-        if cur_idx >= self.file_list_len:
-            cur_idx -= 1
-        self.select(self.file_list[cur_idx])
-
     def fit(self):
         if self.selected_image_name is None:
             return
@@ -190,13 +224,22 @@ class MainWindow(QMainWindow):
         self.imageViewer.rotateLeft()
 
     def nextImage(self):
+        if self.selected_image_name not in self.image_name2idx:
+            return
         idx = self.image_name2idx[self.selected_image_name]
         if idx + 1 < self.file_list_len:
             self.select(self.file_list[idx + 1])
 
     def previousImage(self):
+        if self.selected_image_name not in self.image_name2idx:
+            return
         idx = self.image_name2idx[self.selected_image_name]
         if idx - 1 >= 0:
             self.select(self.file_list[idx - 1])
+
+    def lastImage(self):
+        if self.last_image_name is None:
+            return
+        self.select(self.last_image_name)
 
     ##### edit funtion end #####
