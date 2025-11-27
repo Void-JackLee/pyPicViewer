@@ -39,6 +39,9 @@ class ImageList(QListWidget):
     
     def set_thumbnail(self, dir_path: str, img_name: str, item):
         def set_icon(icon: QIcon):
-            item.setIcon(icon)
+            try: # 防止被删掉
+                item.setIcon(icon)
+            except:
+                pass
         self.thumbnail_loader.request_thumbnail(os.path.join(dir_path, img_name), set_icon)
         

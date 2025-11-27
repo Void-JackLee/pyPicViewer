@@ -56,7 +56,7 @@ class ThumbnailLoader(QObject):
     
     def on_thumbnailed(self, thumbnail_path: str, thumbnail: QImage):
         # print(f'____tget {thumbnail_path}')
-        if self.pending_dict[thumbnail_path] is None:
+        if thumbnail_path not in self.pending_dict or self.pending_dict[thumbnail_path] is None:
             return
         self.pending_dict[thumbnail_path](QIcon(QPixmap.fromImage(thumbnail)))
         del self.pending_dict[thumbnail_path]

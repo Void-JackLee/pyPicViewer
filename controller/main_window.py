@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         # connect signals
         self.actionOpen.triggered.connect(lambda: self.open())
         self.actionOpenPath.triggered.connect(lambda: self.open_path())
+        self.actionReloadPath.triggered.connect(lambda: self.reload_path())
         self.actionDelete.triggered.connect(lambda: self.delete())
         self.actionFit.triggered.connect(lambda: self.fit())
         self.actionRotateRight.triggered.connect(lambda: self.rotateRight())
@@ -149,6 +150,9 @@ class MainWindow(QMainWindow):
     ##### image process end #####
 
     ##### edit funtion start #####
+    def reload_path(self):
+        self.open(os.path.join(self.cur_dir, self.selected_image_name))
+
     def delete(self):
         cur_idx = self.image_name2idx[self.selected_image_name]
 
