@@ -29,11 +29,14 @@ class CacheWorker(QObject):
 
             if need_load:
                 print('do cache:', file_path)
-                image = QImage(file_path)
-                # 读取exif
-                with open(file_path, 'rb') as f:
-                    tags = exifread.process_file(f)
-                self.image_loaded.emit(file_path, image, tags)
+                try: # 防止读取时被删除
+                    image = QImage(file_path)
+                    # 读取exif
+                    with open(file_path, 'rb') as f:
+                        tags = exifread.process_file(f)
+                    self.image_loaded.emit(file_path, image, tags)
+                except:
+                    pass
             self.file_queue.task_done()
 
 class ImageCache(QObject):

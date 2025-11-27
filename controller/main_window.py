@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from typing import Dict, Any
 from PyQt5 import uic
@@ -75,7 +76,7 @@ class MainWindow(QMainWindow):
         self.file_list_len = len(file_list)
         self.image_cache.init(dir_path)
 
-        # TODO: 缩略图
+        # 缩略图
         self.imageList.set_list(dir_path, file_list)
         # resize at first image
         self.imageViewer.keepRatioWhenSwitchImage = False
@@ -126,6 +127,7 @@ class MainWindow(QMainWindow):
 
     def select(self, image_name):
         self.imageList.item(self.image_name2idx[image_name]).setSelected(True)
+        self.imageList.scrollToItem(self.imageList.selectedItems()[0])
 
     def selectChanged(self):
         if len(self.imageList.selectedItems()) == 0:
@@ -148,7 +150,25 @@ class MainWindow(QMainWindow):
 
     ##### edit funtion start #####
     def delete(self):
-        pass
+        cur_idx = self.image_name2idx[self.selected_image_name]
+
+        # perform 'delete' on disk
+        del_path = os.path.join(self.cur_dir, 'trash_pic')
+        os.makedirs(del_path, exist_ok=True)
+        shutil.move(os.path.join(self.cur_dir, self.selected_image_name),del_path)
+
+        # delete cache and update indexs
+        for i in range(cur_idx + 1, self.file_list_len):
+            self.image_name2idx[self.file_list[i]] -= 1
+        del self.image_name2idx[self.selected_image_name]
+        del self.file_list[cur_idx]
+        self.file_list_len -= 1
+        self.imageList.takeItem(cur_idx)
+
+        if self.file_list_len == 0: return
+        if cur_idx >= self.file_list_len:
+            cur_idx -= 1
+        self.select(self.file_list[cur_idx])
 
     def fit(self):
         if self.selected_image_name is None:

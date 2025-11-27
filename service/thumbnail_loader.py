@@ -25,9 +25,13 @@ class ThumbnailWorker(QThread):
 
     def thumbnail(self, image_path: str, thumbnail_path: str):
         # print(f'____tstart {image_path}')
-        thumbnail = QImage(image_path).scaledToHeight(80, Qt.SmoothTransformation)
-        thumbnail.save(thumbnail_path)
-        self.loaded.emit(thumbnail_path, thumbnail)
+        
+        try: # 防止加载时被删除导致崩溃
+            thumbnail = QImage(image_path).scaledToHeight(80, Qt.SmoothTransformation)
+            thumbnail.save(thumbnail_path)
+            self.loaded.emit(thumbnail_path, thumbnail)
+        except:
+            pass
 
 
 class ThumbnailLoader(QObject):
