@@ -5,6 +5,8 @@ from typing import Callable, Dict, Any
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
+from service.util import read_image
+
 class CacheWorker(QObject):
     image_loaded = pyqtSignal(str, QImage, dict)
     before_load = pyqtSignal(str)  # 向主线程询问
@@ -30,7 +32,7 @@ class CacheWorker(QObject):
             if need_load:
                 print('do cache:', file_path)
                 try: # 防止读取时被删除
-                    image = QImage(file_path)
+                    image = read_image(file_path)
                     # 读取exif
                     with open(file_path, 'rb') as f:
                         tags = exifread.process_file(f)

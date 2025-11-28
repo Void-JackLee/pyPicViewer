@@ -5,6 +5,8 @@ from typing import Callable
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QImage, QPixmap
 
+from service.util import read_image
+
 class ThumbnailWorker(QThread):
     loaded = pyqtSignal(str, QImage)
 
@@ -27,7 +29,7 @@ class ThumbnailWorker(QThread):
         # print(f'____tstart {image_path}')
         
         try: # 防止加载时被删除导致崩溃
-            thumbnail = QImage(image_path).scaledToHeight(80, Qt.SmoothTransformation)
+            thumbnail = read_image(image_path).scaledToHeight(80, Qt.SmoothTransformation)
             thumbnail.save(thumbnail_path)
             self.loaded.emit(thumbnail_path, thumbnail)
         except:

@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPixmap
 from .image_viewer import ImageViewer
 from .image_list import ImageList
 from service.image_cache import ImageCache
-from service.util import calc_exif_number
+from service.util import calc_exif_number, NORMAL_FORMAT, RAW_FORMAT
 
 class MainWindow(QMainWindow):
     def __init__(self, dir_path=None):
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
     
         # define consts
         self.APP_NAME = 'picv'
-        self.VALID_FORMAT = ['.png', '.jpg', '.jpeg', '.tif', '.bmp']
+        self.VALID_FORMAT = [*NORMAL_FORMAT, *RAW_FORMAT]
         self.NUMBER_OF_CACHED_IMAGES = 10
 
         # define props
@@ -208,8 +208,21 @@ class MainWindow(QMainWindow):
             self.imageViewer.keepRatioWhenSwitchImage = True
 
             self.setWindowTitle(f'{self.APP_NAME} - {self.selected_image_name}')
-            self.infoLabel.setText(f"当前第{self.image_name2idx[self.selected_image_name] + 1}项，共{self.file_list_len}项; f{calc_exif_number(exif_tags['EXIF FNumber'])} {exif_tags['EXIF ExposureTime']}s iso{exif_tags['EXIF ISOSpeedRatings']} {calc_exif_number(exif_tags['EXIF FocalLength'],2)}mm")
+            self.infoLabel.setText(self.info_text(exif_tags))
         self.image_cache.request_image(image_name, set_image)
+    
+    def info_text(self, exif_tags: Dict[str, Any]):
+        text = f"当前第{self.image_name2idx[self.selected_image_name] + 1}项，共{self.file_list_len}项;"
+        if exif_tags is not None:
+            if 'EXIF FNumber' in exif_tags:
+                text += f" f{calc_exif_number(exif_tags['EXIF FNumber'])}"
+            if 'EXIF ExposureTime' in exif_tags:
+                text += f" {exif_tags['EXIF ExposureTime']}s"
+            if 'EXIF ISOSpeedRatings' in exif_tags:
+                text += f" iso{exif_tags['EXIF ISOSpeedRatings']}"
+            if 'EXIF FocalLength' in exif_tags:
+                text += f" {calc_exif_number(exif_tags['EXIF FocalLength'],2)}mm"
+        return text
     ##### image process end #####
 
     ##### edit funtion start #####
