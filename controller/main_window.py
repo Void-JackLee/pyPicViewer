@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from typing import Dict, Any
 from PyQt5 import uic
@@ -20,7 +21,8 @@ class MainWindow(QMainWindow):
         # define ui
         self.imageList: ImageList = None
         self.imageViewer: ImageViewer = None
-        uic.loadUi('ui/main_window.ui', self, package='controller')
+        main_file = getattr(sys.modules['__main__'], '__file__', None)
+        uic.loadUi(os.path.join(os.path.dirname(os.path.abspath(main_file)),'ui','main_window.ui'), self, package='controller')
 
         self.infoLabel = QLabel('')
         self.infoLabel.setAlignment(Qt.AlignCenter)
