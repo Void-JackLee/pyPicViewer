@@ -87,7 +87,6 @@ class ImageCache(QObject):
             del self.image_cache[file_name]
             del self.exif_cache[file_name]
 
-        # TODO: 避免重复加载
         cache_set = set([os.path.join(self.cur_dir, file_name) for file_name in valid_names])
         self.cache_set = cache_set
 

@@ -204,10 +204,10 @@
   </action>
   <action name="actionLast">
    <property name="text">
-    <string>Last</string>
+    <string>View Last Image</string>
    </property>
    <property name="shortcut">
-    <string>C</string>
+    <string>Z</string>
    </property>
   </action>
   <action name="actionDelete">

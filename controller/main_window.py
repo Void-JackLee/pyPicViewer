@@ -168,6 +168,9 @@ class MainWindow(QMainWindow):
         cur_idx = self.image_name2idx[self.selected_image_name]
         valid_names = []
 
+        # 不怕重复，因为后续会判断是否需要重新加载
+        if self.last_image_name is not None: valid_names.append(self.last_image_name)
+
         i = cur_idx
         j = cur_idx + 1
         lower_bound = max(0,cur_idx - self.NUMBER_OF_CACHED_IMAGES)
