@@ -1,3 +1,5 @@
+import math
+
 from PyQt5.QtWidgets import (
     QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsItem
 )
@@ -105,6 +107,8 @@ class ImageViewer(QGraphicsView):
         # 调整图片大小
         if not self.keepRatioWhenSwitchImage:
             self.resetAndFit()
+        else:
+            self.renewTransform()
     
     def resetAndFit(self):
         self.resetTransform()
@@ -114,6 +118,35 @@ class ImageViewer(QGraphicsView):
         if ratio < 1:
             self.fitInView(self.pixmapItem, Qt.KeepAspectRatio)
 
+    def renewTransform(self):
+        h = self.horizontalScrollBar().value()
+        v = self.verticalScrollBar().value()
+        rotate = self.getRotateAngel()
+
+        super().resetTransform()
+        
+        self.setSceneRect(QRectF(self.pixmap.rect()))
+        ratio = self.__getScaleRatio()
+        self.displayedImageSize = self.pixmap.size()*ratio
+        if ratio < 1:
+            super().fitInView(self.pixmapItem, Qt.KeepAspectRatio)
+            self.displayedImageSize = self.__getScaleRatio()*self.pixmap.size()
+        
+        
+        
+        rect = self.pixmapItem.sceneBoundingRect()
+        scale_x = self.transform().m11()
+        height = rect.height() * scale_x
+        width = rect.width() * scale_x
+
+        self.rotate(rotate)
+        if rotate % 180 != 0:
+            self.scale(height / width, height / width)
+
+        self.scale(self.zoomInFactors, self.zoomInFactors)
+        
+        self.horizontalScrollBar().setValue(h)
+        self.verticalScrollBar().setValue(v)
 
     def resetTransform(self):
         """ 重置变换 """
@@ -123,8 +156,8 @@ class ImageViewer(QGraphicsView):
 
     def __isEnableDrag(self):
         """ 根据图片的尺寸决定是否启动拖拽功能 """
-        v = self.verticalScrollBar().maximum() > 0
-        h = self.horizontalScrollBar().maximum() > 0
+        v = self.verticalScrollBar().maximum() != 0
+        h = self.horizontalScrollBar().maximum() != 0
         return v or h
 
     def __setDragEnabled(self, isEnabled: bool):
@@ -149,15 +182,22 @@ class ImageViewer(QGraphicsView):
         self.displayedImageSize = self.__getScaleRatio()*self.pixmap.size()
         self.zoomInFactors = 1.0
 
+    def getRotateAngel(self):
+        transform = self.transform()
+        angle_rad = math.atan2(transform.m12(), transform.m11())
+        angle_deg = math.degrees(angle_rad)
+        return angle_deg
+
     def rotateRight(self):
-        self.pixmapItem.setTransformOriginPoint(self.pixmap.rect().center())
-        self.pixmapItem.setRotation(self.pixmapItem.rotation() + 90)
-        self.displayedImageSize = QSize(self.displayedImageSize.height(), self.displayedImageSize.width())
+        self.rotate(90)
+        self.renewTransform()
+        # self.__setDragEnabled(self.__isEnableDrag())
+        
 
     def rotateLeft(self):
-        self.pixmapItem.setTransformOriginPoint(self.pixmap.rect().center())
-        self.pixmapItem.setRotation(self.pixmapItem.rotation() - 90)
-        self.displayedImageSize = QSize(self.displayedImageSize.height(), self.displayedImageSize.width())
+        self.rotate(-90)
+        self.renewTransform()
+        # self.__setDragEnabled(self.__isEnableDrag())
 
     def zoomIn(self, factor=1.1, viewAnchor=QGraphicsView.AnchorUnderMouse):
         """ 放大图像 """
