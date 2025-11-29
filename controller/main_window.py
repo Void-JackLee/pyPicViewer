@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
         if self.file_list_len == 0: return
         if cur_idx >= self.file_list_len:
             cur_idx -= 1
-        self.selected_image_name = None # 防止last读到空
+        # self.selected_image_name = None # 防止last读到空
         self.select(self.file_list[cur_idx])
     
     def _close(self):
@@ -256,7 +256,7 @@ class MainWindow(QMainWindow):
             self.select(self.file_list[idx - 1])
 
     def lastImage(self):
-        if self.last_image_name is None:
+        if self.last_image_name not in self.image_name2idx:
             return
         self.select(self.last_image_name)
 

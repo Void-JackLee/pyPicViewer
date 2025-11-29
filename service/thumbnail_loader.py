@@ -1,5 +1,6 @@
 import os
 import queue
+from pathlib import Path
 from typing import Callable
 
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
@@ -48,7 +49,10 @@ class ThumbnailLoader(QObject):
         self.worker.start()
     
     def request_thumbnail(self, image_path: str, callback: Callable[[QIcon], None]):
-        thumbnail_path = os.path.join(self.thumbnail_dir, image_path.replace('_','-').replace(os.sep,'_'))
+        _image_path = image_path.replace('_','-').replace(os.sep,'_')
+        if not image_path.endswith(".JPG"):
+            _image_path += ".JPG"
+        thumbnail_path = os.path.join(self.thumbnail_dir,  _image_path)
         if os.path.exists(thumbnail_path):
             callback(QIcon(thumbnail_path))
         else:
