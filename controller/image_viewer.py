@@ -191,13 +191,10 @@ class ImageViewer(QGraphicsView):
     def rotateRight(self):
         self.rotate(90)
         self.renewTransform()
-        # self.__setDragEnabled(self.__isEnableDrag())
-        
 
     def rotateLeft(self):
         self.rotate(-90)
         self.renewTransform()
-        # self.__setDragEnabled(self.__isEnableDrag())
 
     def zoomIn(self, factor=1.1, viewAnchor=QGraphicsView.AnchorUnderMouse):
         """ 放大图像 """
