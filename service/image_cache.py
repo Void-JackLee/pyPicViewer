@@ -115,8 +115,8 @@ class ImageCache(QObject):
         if file_name in self.image_cache:
             return
         # print(f'get {file_name}')
-        if file_name.endswith('.CR3'):
-            print(exif_tags)
+        # if file_name.endswith('.CR3'):
+        #     print(exif_tags)
         if 'Image Orientation' in exif_tags:
             val = exif_tags['Image Orientation'].values[0]
             if val == 3:
