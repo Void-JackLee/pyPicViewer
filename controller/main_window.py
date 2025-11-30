@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 
+from pathlib import Path
 from typing import Dict, Any
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
@@ -41,6 +42,7 @@ class MainWindow(QMainWindow):
         self.actionNext.triggered.connect(lambda: self.nextImage())
         self.actionPrevious.triggered.connect(lambda: self.previousImage())
         self.actionLast.triggered.connect(lambda: self.lastImage())
+        self.actionSortByFormat.triggered.connect(lambda x: self._sort_by_format(x))
         self.imageList.itemSelectionChanged.connect(self.selectChanged)
     
         # define consts
@@ -56,6 +58,7 @@ class MainWindow(QMainWindow):
         self.file_list: list[str] = []
         self.file_list_len = 0
         self.image_cache = ImageCache()
+        self.sort_by_format = False
 
         # process dirPath
         if dir_path is not None:
@@ -68,11 +71,15 @@ class MainWindow(QMainWindow):
                 pass
     
     ##### file process start #####
-    def init_dir(self, dir_path):
+    def init_dir(self, dir_path, only_sort=False):
         all_items = os.listdir(dir_path)
         valid_ext = set(self.VALID_FORMAT)
         file_list = [f for f in all_items if os.path.isfile(os.path.join(dir_path, f)) and os.path.splitext(f)[1].lower() in valid_ext]
-        file_list.sort()
+        
+        if self.sort_by_format:
+            file_list.sort(key=lambda x: (Path(x).suffix.lower(), x))
+        else:
+            file_list.sort()
 
         self.image_name2idx = {}
         for i, file_name in enumerate(file_list):
@@ -81,13 +88,16 @@ class MainWindow(QMainWindow):
         self.cur_dir = dir_path
         self.file_list = file_list
         self.file_list_len = len(file_list)
-        self.image_cache.init(dir_path)
-        self.last_image_name = None
-
+        
         # 缩略图
         self.imageList.set_list(dir_path, file_list)
-        # resize at first image
-        self.imageViewer.keepRatioWhenSwitchImage = False
+
+        if not only_sort:
+            self.image_cache.init(dir_path)
+            self.last_image_name = None
+            # resize at first image
+            self.imageViewer.keepRatioWhenSwitchImage = False
+        
 
     def open(self, file_path=None):
         if file_path is None:
@@ -159,8 +169,6 @@ class MainWindow(QMainWindow):
         self.file_list_len = 0
         self.infoLabel.setText('')
         self.setWindowTitle('picv')
-
-
     ##### file process end #####
 
     ##### image process start #####
@@ -260,4 +268,9 @@ class MainWindow(QMainWindow):
             return
         self.select(self.last_image_name)
 
+    def _sort_by_format(self, checked):
+        self.sort_by_format = checked
+        if self.cur_dir:
+            self.init_dir(self.cur_dir, only_sort=True)
+            self.select(self.selected_image_name)
     ##### edit funtion end #####

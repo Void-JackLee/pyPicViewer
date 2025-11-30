@@ -108,6 +108,8 @@
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
     <addaction name="actionLast"/>
+    <addaction name="separator"/>
+    <addaction name="actionSortByFormat"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_edit"/>
@@ -216,6 +218,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Backspace</string>
+   </property>
+  </action>
+  <action name="actionSortByFormat">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sort By Format</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
    </property>
   </action>
  </widget>
