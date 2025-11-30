@@ -3,7 +3,7 @@ import queue
 import exifread
 from typing import Callable, Dict, Any
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QTransform
 
 from service.util import read_image
 
@@ -115,6 +115,17 @@ class ImageCache(QObject):
         if file_name in self.image_cache:
             return
         # print(f'get {file_name}')
+        if file_name.endswith('.CR3'):
+            print(exif_tags)
+        if 'Image Orientation' in exif_tags:
+            val = exif_tags['Image Orientation'].values[0]
+            if val == 3:
+                image = image.transformed(QTransform().rotate(180), mode = 1)
+            elif val == 6:
+                image = image.transformed(QTransform().rotate(90), mode = 1)
+            elif val == 8:
+                image = image.transformed(QTransform().rotate(-90), mode = 1)
+
         self.image_cache[file_name] = image
         self.exif_cache[file_name] = exif_tags
         if self.requested_file is not None:
