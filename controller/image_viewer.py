@@ -132,8 +132,6 @@ class ImageViewer(QGraphicsView):
             super().fitInView(self.pixmapItem, Qt.KeepAspectRatio)
             self.displayedImageSize = self.__getScaleRatio()*self.pixmap.size()
         
-        
-        
         rect = self.pixmapItem.sceneBoundingRect()
         scale_x = self.transform().m11()
         height = rect.height() * scale_x
