@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
 
 from service.thumbnail_loader import ThumbnailLoader
 
+from service.util import THUMBNAIL_DIR
+
 # class ListItem(QWidget):
 #     def __init__(self, img_path, img_name, parent=None):
 #         super().__init__(parent=parent)
@@ -20,7 +22,7 @@ from service.thumbnail_loader import ThumbnailLoader
 class ImageList(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.THUMBNAIL_DIR = os.path.join(Path.home(),'.jthumb')
+        self.THUMBNAIL_DIR = THUMBNAIL_DIR
         self.thumbnail_loader = ThumbnailLoader(self.THUMBNAIL_DIR)
         
     def set_list(self, dir_path, file_list):

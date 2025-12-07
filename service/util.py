@@ -1,6 +1,7 @@
 import os
 import rawpy
 import imageio
+import subprocess
 
 from pathlib import Path
 from PyQt5.QtGui import QImage
@@ -14,28 +15,67 @@ def calc_exif_number(fstr, number=1):
     b = fstr[idx+1:]
     return f'{float(a)/float(b):.{number}f}'
 
+DNG_CONVERTER_PATH = "/Applications/Adobe DNG Converter.app/Contents/MacOS/Adobe DNG Converter"
+
 NORMAL_FORMAT = ['.png', '.jpg', '.jpeg', '.tif', '.bmp']
 RAW_FORMAT = ['.cr2', '.cr3', '.nef', '.arw', '.orf', '.dng']
 
 NORMAL_FORMAT_SET = set(NORMAL_FORMAT)
+THUMBNAIL_DIR = os.path.join(Path.home(),'.jthumb')
+os.makedirs(THUMBNAIL_DIR, exist_ok=True)
 
 def read_image(file_path):
     if Path(file_path).suffix.lower() in NORMAL_FORMAT_SET:
         return QImage(file_path)
     # read raw
     print(f'read as raw of {os.path.basename(file_path)}')
-    with rawpy.imread(file_path) as raw:
-        thumb = raw.extract_thumb()
-        if thumb.format == rawpy.ThumbFormat.JPEG:
-            # JPEG 预览
-            img = imageio.imread(thumb.data)
-        elif thumb.format == rawpy.ThumbFormat.BITMAP:
-            # BITMAP 预览，直接用 numpy 数组
-            img = thumb.data
+    try:
+        with rawpy.imread(file_path) as raw:
+            thumb = raw.extract_thumb()
+            if thumb.format == rawpy.ThumbFormat.JPEG:
+                # JPEG 预览
+                img = imageio.imread(thumb.data)
+            elif thumb.format == rawpy.ThumbFormat.BITMAP:
+                # BITMAP 预览，直接用 numpy 数组
+                img = thumb.data
+            else:
+                # 没有预览图，用解码后的图片
+                img = raw.postprocess()
+    except:
+        print('not support, using dng converter')
+        dng_file = convert2dng(file_path, THUMBNAIL_DIR)
+        if dng_file is None:
+            print('DNG Converter not install!')
         else:
-            # 没有预览图，用解码后的图片
-            img = raw.postprocess()
+            with rawpy.imread(dng_file) as raw:
+                thumb = raw.extract_thumb()
+                if thumb.format == rawpy.ThumbFormat.JPEG:
+                    # JPEG 预览
+                    img = imageio.imread(thumb.data)
+                elif thumb.format == rawpy.ThumbFormat.BITMAP:
+                    # BITMAP 预览，直接用 numpy 数组
+                    img = thumb.data
+                else:
+                    # 没有预览图，用解码后的图片
+                    img = raw.postprocess()
+            os.remove(dng_file)
+        
+
     # numpy 数组转 QImage
     height, width, channel = img.shape
     bytes_per_line = channel * width
     return QImage(img.data, width, height, bytes_per_line, QImage.Format_RGB888).copy()
+
+def convert2dng(file_path, target_dir):
+    if not os.path.isfile(DNG_CONVERTER_PATH):
+        return None
+    file_name = Path(file_path).stem
+    dng_path = os.path.join(target_dir, file_name+'.dng')
+    cmd = [
+        DNG_CONVERTER_PATH,
+        "-d", target_dir,
+        file_path
+    ]
+    os.remove(dng_path)
+    subprocess.run(cmd, check=True)
+    return dng_path
